@@ -4,6 +4,9 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "test:chrome": "cd packages/testing && yarn chrome:start",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore"
   },

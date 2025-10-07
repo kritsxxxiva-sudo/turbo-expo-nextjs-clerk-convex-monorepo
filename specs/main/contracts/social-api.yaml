@@ -1,0 +1,675 @@
+openapi: 3.0.3
+info:
+  title: Social Media API
+  description: Ayrshare social media integration API contracts
+  version: 1.0.0
+  contact:
+    name: Development Team
+    email: dev@example.com
+
+servers:
+  - url: https://api.convex.dev
+    description: Convex API Server
+
+paths:
+  /api/social/accounts:
+    get:
+      summary: Get connected social accounts
+      description: Retrieve all connected social media accounts for the authenticated user
+      operationId: getSocialAccounts
+      security:
+        - ClerkJWT: []
+      responses:
+        '200':
+          description: Social accounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accounts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SocialAccount'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Connect social account
+      description: Connect a new social media account via OAuth
+      operationId: connectSocialAccount
+      security:
+        - ClerkJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectAccountRequest'
+      responses:
+        '201':
+          description: Social account connected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialAccount'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Account already connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/social/accounts/{accountId}:
+    delete:
+      summary: Disconnect social account
+      description: Disconnect a connected social media account
+      operationId: disconnectSocialAccount
+      security:
+        - ClerkJWT: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Social account document ID
+      responses:
+        '200':
+          description: Social account disconnected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Account disconnected successfully"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/social/posts:
+    get:
+      summary: Get social posts
+      description: Retrieve social media posts for the authenticated user
+      operationId: getSocialPosts
+      security:
+        - ClerkJWT: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [draft, scheduled, published, failed, deleted]
+          description: Filter posts by status
+        - name: platform
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter posts by platform
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of posts to retrieve
+      responses:
+        '200':
+          description: Social posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SocialPost'
+                  hasMore:
+                    type: boolean
+                    description: Whether more posts are available
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create social post
+      description: Create a new social media post
+      operationId: createSocialPost
+      security:
+        - ClerkJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Social post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialPost'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/social/posts/{postId}/publish:
+    post:
+      summary: Publish social post
+      description: Publish a draft or scheduled social media post
+      operationId: publishSocialPost
+      security:
+        - ClerkJWT: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Social post document ID
+      responses:
+        '200':
+          description: Post published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialPost'
+        '400':
+          description: Invalid request or post cannot be published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/social/posts/{postId}:
+    delete:
+      summary: Delete social post
+      description: Delete a social media post
+      operationId: deleteSocialPost
+      security:
+        - ClerkJWT: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Social post document ID
+      responses:
+        '200':
+          description: Post deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Post deleted successfully"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/social/analytics:
+    get:
+      summary: Get social media analytics
+      description: Retrieve analytics data for social media posts
+      operationId: getSocialAnalytics
+      security:
+        - ClerkJWT: []
+      parameters:
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Start date for analytics (ISO 8601)
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: End date for analytics (ISO 8601)
+        - name: platforms
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Filter analytics by platforms
+      responses:
+        '200':
+          description: Analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    ClerkJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Clerk JWT token for user authentication
+
+  schemas:
+    SocialAccount:
+      type: object
+      required:
+        - _id
+        - userId
+        - platform
+        - accountId
+        - accountName
+        - permissions
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        _id:
+          type: string
+          description: Convex document ID
+        userId:
+          type: string
+          description: Reference to user document
+        platform:
+          type: string
+          enum: [facebook, instagram, x, linkedin, tiktok, youtube, pinterest, reddit, snapchat, telegram, threads, bluesky, google_business]
+          description: Social media platform
+        accountId:
+          type: string
+          description: Platform-specific account ID
+        accountName:
+          type: string
+          description: Display name for the account
+        profileUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Profile URL on the platform
+        profileImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Profile image URL
+        permissions:
+          type: array
+          items:
+            type: string
+          description: Granted permissions for the account
+        isActive:
+          type: boolean
+          description: Whether the account connection is active
+        lastSyncAt:
+          type: number
+          nullable: true
+          description: Last synchronization timestamp
+        createdAt:
+          type: number
+          description: Connection creation timestamp
+        updatedAt:
+          type: number
+          description: Last update timestamp
+
+    SocialPost:
+      type: object
+      required:
+        - _id
+        - userId
+        - content
+        - platforms
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        _id:
+          type: string
+          description: Convex document ID
+        userId:
+          type: string
+          description: Reference to user document
+        noteId:
+          type: string
+          nullable: true
+          description: Reference to note document (if applicable)
+        ayrsharePostId:
+          type: string
+          nullable: true
+          description: Ayrshare post ID
+        content:
+          type: string
+          description: Post content
+          maxLength: 2000
+        platforms:
+          type: array
+          items:
+            type: string
+          description: Target platforms for the post
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          nullable: true
+          description: Media attachment URLs
+        scheduledAt:
+          type: number
+          nullable: true
+          description: Scheduled publication timestamp
+        publishedAt:
+          type: number
+          nullable: true
+          description: Actual publication timestamp
+        status:
+          type: string
+          enum: [draft, scheduled, published, failed, deleted]
+          description: Post status
+        analytics:
+          $ref: '#/components/schemas/PostAnalytics'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostError'
+          nullable: true
+          description: Platform-specific errors
+        createdAt:
+          type: number
+          description: Post creation timestamp
+        updatedAt:
+          type: number
+          description: Last update timestamp
+
+    PostAnalytics:
+      type: object
+      properties:
+        views:
+          type: integer
+          nullable: true
+          description: Total views
+        likes:
+          type: integer
+          nullable: true
+          description: Total likes
+        shares:
+          type: integer
+          nullable: true
+          description: Total shares
+        comments:
+          type: integer
+          nullable: true
+          description: Total comments
+        clicks:
+          type: integer
+          nullable: true
+          description: Total clicks
+        lastUpdated:
+          type: number
+          description: Analytics last update timestamp
+
+    PostError:
+      type: object
+      required:
+        - platform
+        - error
+        - timestamp
+      properties:
+        platform:
+          type: string
+          description: Platform where error occurred
+        error:
+          type: string
+          description: Error message
+        timestamp:
+          type: number
+          description: Error timestamp
+
+    ConnectAccountRequest:
+      type: object
+      required:
+        - platform
+        - authCode
+      properties:
+        platform:
+          type: string
+          enum: [facebook, instagram, x, linkedin, tiktok, youtube, pinterest, reddit, snapchat, telegram, threads, bluesky, google_business]
+          description: Social media platform to connect
+        authCode:
+          type: string
+          description: OAuth authorization code
+
+    CreatePostRequest:
+      type: object
+      required:
+        - content
+        - platforms
+      properties:
+        content:
+          type: string
+          description: Post content
+          minLength: 1
+          maxLength: 2000
+        platforms:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: Target platforms for the post
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          nullable: true
+          description: Media attachment URLs
+        scheduledAt:
+          type: number
+          nullable: true
+          description: Scheduled publication timestamp (must be in future)
+        noteId:
+          type: string
+          nullable: true
+          description: Reference to note document
+
+    AnalyticsResponse:
+      type: object
+      required:
+        - summary
+        - platforms
+        - timeRange
+      properties:
+        summary:
+          type: object
+          required:
+            - totalPosts
+            - totalViews
+            - totalLikes
+            - totalShares
+            - totalComments
+          properties:
+            totalPosts:
+              type: integer
+              description: Total number of posts
+            totalViews:
+              type: integer
+              description: Total views across all posts
+            totalLikes:
+              type: integer
+              description: Total likes across all posts
+            totalShares:
+              type: integer
+              description: Total shares across all posts
+            totalComments:
+              type: integer
+              description: Total comments across all posts
+        platforms:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/PlatformAnalytics'
+          description: Analytics data per platform
+        timeRange:
+          type: object
+          required:
+            - startDate
+            - endDate
+          properties:
+            startDate:
+              type: string
+              format: date
+              description: Analytics start date
+            endDate:
+              type: string
+              format: date
+              description: Analytics end date
+
+    PlatformAnalytics:
+      type: object
+      required:
+        - posts
+        - views
+        - likes
+        - shares
+        - comments
+      properties:
+        posts:
+          type: integer
+          description: Number of posts on this platform
+        views:
+          type: integer
+          description: Total views on this platform
+        likes:
+          type: integer
+          description: Total likes on this platform
+        shares:
+          type: integer
+          description: Total shares on this platform
+        comments:
+          type: integer
+          description: Total comments on this platform
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - validationErrors
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+        validationErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: Field name with validation error
+              message:
+                type: string
+                description: Validation error message

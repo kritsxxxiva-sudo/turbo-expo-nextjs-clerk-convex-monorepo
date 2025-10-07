@@ -20,7 +20,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, montserrat.className, lato.className)}>
+      <body
+        className={cn(inter.className, montserrat.className, lato.className)}
+      >
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
     </html>
