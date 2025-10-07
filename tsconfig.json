@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@packages/types": ["packages/types/src"],
+      "@packages/types/*": ["packages/types/src/*"],
+      "@packages/api-clients": ["packages/api-clients/src"],
+      "@packages/api-clients/*": ["packages/api-clients/src/*"],
+      "@packages/backend": ["packages/backend/convex"],
+      "@packages/backend/*": ["packages/backend/convex/*"],
+      "@packages/testing": ["packages/testing/src"],
+      "@packages/testing/*": ["packages/testing/src/*"]
+    }
+  },
+  "include": [],
+  "exclude": ["node_modules", "dist", "build", ".next"],
+  "references": [
+    {
+      "path": "./packages/types"
+    },
+    {
+      "path": "./packages/api-clients"
+    },
+    {
+      "path": "./packages/testing"
+    }
+  ]
+}

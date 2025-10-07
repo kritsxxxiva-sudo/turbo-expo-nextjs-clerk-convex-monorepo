@@ -1,0 +1,89 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "description": "Access to local filesystem for reading and writing files",
+      "enabled": true
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "@executeautomation/mcp-chrome-devtools"],
+      "description": "Chrome DevTools integration for browser automation and performance testing",
+      "enabled": true
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git"],
+      "description": "Git operations for version control",
+      "enabled": true
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub integration for issues, PRs, and repositories",
+      "enabled": false,
+      "note": "Requires GITHUB_PERSONAL_ACCESS_TOKEN environment variable"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://localhost/mydb"
+      ],
+      "description": "PostgreSQL database access",
+      "enabled": false,
+      "note": "Update connection string as needed"
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "--db-path",
+        "./data.db"
+      ],
+      "description": "SQLite database access",
+      "enabled": false,
+      "note": "Update database path as needed"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Brave Search API for web searches",
+      "enabled": false,
+      "note": "Requires BRAVE_API_KEY environment variable"
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "description": "HTTP fetch capabilities for API calls",
+      "enabled": true
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "description": "Browser automation with Puppeteer",
+      "enabled": false
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory/knowledge base for storing context",
+      "enabled": true
+    }
+  },
+  "version": "1.0.0",
+  "metadata": {
+    "project": "turbo-expo-nextjs-clerk-convex-monorepo",
+    "description": "MCP server configuration for Augment CLI in a Turborepo monorepo",
+    "updated": "2025-10-06"
+  }
+}

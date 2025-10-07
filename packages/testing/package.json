@@ -1,0 +1,46 @@
+{
+  "name": "@packages/testing",
+  "version": "1.0.0",
+  "description": "Shared testing utilities and Chrome DevTools automation for the monorepo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "jest --config jest.e2e.config.js",
+    "chrome:start": "node scripts/start-chrome.js",
+    "chrome:stop": "node scripts/stop-chrome.js"
+  },
+  "dependencies": {
+    "chrome-devtools-mcp": "^0.6.0",
+    "chrome-launcher": "^1.2.1",
+    "chrome-remote-interface": "^0.33.2",
+    "puppeteer": "^24.23.0"
+  },
+  "devDependencies": {
+    "@types/chrome-remote-interface": "^0.31.14",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.32",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "convex": "^1.13.0"
+  },
+  "files": [
+    "dist",
+    "scripts"
+  ],
+  "keywords": [
+    "testing",
+    "chrome-devtools",
+    "automation",
+    "e2e",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC"
+}

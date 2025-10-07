@@ -1,0 +1,403 @@
+openapi: 3.0.3
+info:
+  title: Authentication API
+  description: Clerk authentication integration API contracts
+  version: 1.0.0
+  contact:
+    name: Development Team
+    email: dev@example.com
+
+servers:
+  - url: https://api.convex.dev
+    description: Convex API Server
+
+paths:
+  /api/auth/user:
+    get:
+      summary: Get current authenticated user
+      description: Retrieve the current authenticated user's profile information
+      operationId: getCurrentUser
+      security:
+        - ClerkJWT: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized - invalid or missing JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/user/profile:
+    put:
+      summary: Update user profile
+      description: Update the authenticated user's profile information
+      operationId: updateUserProfile
+      security:
+        - ClerkJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/user/preferences:
+    put:
+      summary: Update user preferences
+      description: Update the authenticated user's preferences
+      operationId: updateUserPreferences
+      security:
+        - ClerkJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferences'
+      responses:
+        '200':
+          description: Preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid preferences data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/webhooks/clerk:
+    post:
+      summary: Process Clerk webhook
+      description: Handle incoming Clerk webhook events
+      operationId: processClerkWebhook
+      security:
+        - ClerkWebhookSignature: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClerkWebhookPayload'
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Webhook processed successfully"
+        '400':
+          description: Invalid webhook payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid webhook signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    ClerkJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Clerk JWT token for user authentication
+    ClerkWebhookSignature:
+      type: apiKey
+      in: header
+      name: svix-signature
+      description: Clerk webhook signature for verification
+
+  schemas:
+    User:
+      type: object
+      required:
+        - _id
+        - clerkId
+        - email
+        - role
+        - status
+        - preferences
+        - createdAt
+        - updatedAt
+      properties:
+        _id:
+          type: string
+          description: Convex document ID
+          example: "j57d8f9g0h1i2j3k4l5m6n7o"
+        clerkId:
+          type: string
+          description: Clerk user ID
+          example: "user_2NiSJXXEqHMqn5DEj7Q7dY8Vg5l"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+        firstName:
+          type: string
+          nullable: true
+          description: User's first name
+          example: "John"
+        lastName:
+          type: string
+          nullable: true
+          description: User's last name
+          example: "Doe"
+        username:
+          type: string
+          nullable: true
+          description: User's username
+          example: "johndoe"
+        profileImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to user's profile image
+          example: "https://images.clerk.dev/uploaded/img_123.png"
+        role:
+          type: string
+          enum: [admin, premium, free]
+          description: User's role
+          example: "free"
+        status:
+          type: string
+          enum: [active, suspended, deleted]
+          description: User's account status
+          example: "active"
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: Additional user metadata
+        createdAt:
+          type: number
+          description: Account creation timestamp
+          example: 1699123456789
+        updatedAt:
+          type: number
+          description: Last update timestamp
+          example: 1699123456789
+        lastLoginAt:
+          type: number
+          nullable: true
+          description: Last login timestamp
+          example: 1699123456789
+        emailVerifiedAt:
+          type: number
+          nullable: true
+          description: Email verification timestamp
+          example: 1699123456789
+
+    UserPreferences:
+      type: object
+      required:
+        - theme
+        - language
+        - timezone
+        - notifications
+        - privacy
+      properties:
+        theme:
+          type: string
+          enum: [light, dark, system]
+          description: UI theme preference
+          example: "system"
+        language:
+          type: string
+          description: Language preference (ISO 639-1)
+          example: "en"
+        timezone:
+          type: string
+          description: Timezone preference (IANA)
+          example: "America/New_York"
+        notifications:
+          type: object
+          required:
+            - email
+            - push
+            - marketing
+            - security
+          properties:
+            email:
+              type: boolean
+              description: Email notifications enabled
+              example: true
+            push:
+              type: boolean
+              description: Push notifications enabled
+              example: true
+            marketing:
+              type: boolean
+              description: Marketing notifications enabled
+              example: false
+            security:
+              type: boolean
+              description: Security notifications enabled
+              example: true
+        privacy:
+          type: object
+          required:
+            - profileVisible
+            - analyticsEnabled
+            - dataSharing
+          properties:
+            profileVisible:
+              type: boolean
+              description: Profile visibility
+              example: true
+            analyticsEnabled:
+              type: boolean
+              description: Analytics tracking enabled
+              example: true
+            dataSharing:
+              type: boolean
+              description: Data sharing enabled
+              example: false
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        firstName:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 50
+          example: "John"
+        lastName:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 50
+          example: "Doe"
+        username:
+          type: string
+          nullable: true
+          pattern: '^[a-zA-Z0-9_-]+$'
+          minLength: 3
+          maxLength: 30
+          example: "johndoe"
+
+    ClerkWebhookPayload:
+      type: object
+      required:
+        - type
+        - data
+      properties:
+        type:
+          type: string
+          description: Webhook event type
+          enum:
+            - user.created
+            - user.updated
+            - user.deleted
+            - session.created
+            - session.ended
+          example: "user.created"
+        data:
+          type: object
+          description: Event data payload
+          additionalProperties: true
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "UNAUTHORIZED"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Authentication required"
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - validationErrors
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Request validation failed"
+        validationErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: Field name with validation error
+                example: "email"
+              message:
+                type: string
+                description: Validation error message
+                example: "Invalid email format"
